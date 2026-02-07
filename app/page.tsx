@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Sparkles, Brain, Zap } from "lucide-react";
+import { Loader2, Sparkles, Brain, GitFork } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Timeline } from "@/components/Timeline";
 
 interface Message {
   role: string;
@@ -62,7 +63,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
       {/* Animated background grid */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] opacity-20" />
-      
+
       <div className="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
         {/* Header */}
         <motion.div
@@ -71,6 +72,16 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
+          {/* SDG Badges at the top - Prominent Position */}
+          <div className="flex gap-3 justify-center mb-6">
+            <Badge variant="outline" className="border-green-500 text-green-400 bg-green-500/10 px-4 py-2 text-sm font-semibold">
+              🎓 SDG 4: Quality Education
+            </Badge>
+            <Badge variant="outline" className="border-blue-500 text-blue-400 bg-blue-500/10 px-4 py-2 text-sm font-semibold">
+              💼 SDG 8: Decent Work
+            </Badge>
+          </div>
+
           <div className="flex items-center justify-center gap-3 mb-4">
             <Brain className="w-12 h-12 text-cyan-400" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
@@ -82,17 +93,14 @@ export default function Home() {
             <span className="text-purple-400 font-semibold">Groq Llama 3.3</span>
           </p>
           <div className="flex gap-2 justify-center mt-4">
-            <Badge variant="outline" className="border-green-500/50 text-green-400">
-              SDG 4: Quality Education
-            </Badge>
-            <Badge variant="outline" className="border-blue-500/50 text-blue-400">
-              SDG 8: Decent Work
-            </Badge>
             <Badge variant="outline" className="border-cyan-500/50 text-cyan-400">
-              Next.js 15
+              Next.js 16
             </Badge>
             <Badge variant="outline" className="border-purple-500/50 text-purple-400">
               TypeScript
+            </Badge>
+            <Badge variant="outline" className="border-pink-500/50 text-pink-400">
+              Framer Motion
             </Badge>
           </div>
         </motion.div>
@@ -122,6 +130,40 @@ export default function Home() {
                 className="w-full min-h-[120px] bg-slate-950/50 border border-slate-700 rounded-lg p-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent resize-none font-mono text-sm"
                 disabled={loading}
               />
+
+              {/* Suggestion Chips */}
+              <div className="flex flex-wrap gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setPrompt("Simulate a reality where I drop out of college and build an AI startup")}
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm font-medium hover:border-yellow-400/50 transition-all duration-200 backdrop-blur-sm"
+                  disabled={loading}
+                >
+                  ⚡ Fork: AI Startup
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setPrompt("Simulate a reality where I take a corporate job at a Fortune 500 company")}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-full text-blue-300 text-sm font-medium hover:border-blue-400/50 transition-all duration-200 backdrop-blur-sm"
+                  disabled={loading}
+                >
+                  🎓 Fork: Corporate Job
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setPrompt("Merge two realities: startup founder vs MBA student. Show me the convergence points.")}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-full text-purple-300 text-sm font-medium hover:border-purple-400/50 transition-all duration-200 backdrop-blur-sm"
+                  disabled={loading}
+                >
+                  ⚔️ Merge: Startup vs MBA
+                </motion.button>
+              </div>
+
               <Button
                 onClick={handleRunAgent}
                 disabled={loading || !prompt.trim()}
@@ -134,8 +176,8 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Zap className="mr-2 h-5 w-5" />
-                    Fork Reality ⚡
+                    <GitFork className="mr-2 h-5 w-5" />
+                    Fork Reality
                   </>
                 )}
               </Button>
@@ -216,11 +258,10 @@ export default function Home() {
                   </Card>
 
                   {/* Final Result */}
-                  <Card className={`bg-gradient-to-br from-cyan-950/30 to-blue-950/30 backdrop-blur-sm ${
-                    response.finalResult.includes("Glitches") || response.finalResult.includes("Glitched")
-                      ? "border-red-500/50"
-                      : "border-cyan-800/50"
-                  }`}>
+                  <Card className={`bg-gradient-to-br from-cyan-950/30 to-blue-950/30 backdrop-blur-sm ${response.finalResult.includes("Critical") || response.finalResult.includes("Glitches") || response.finalResult.includes("Glitched")
+                    ? "border-red-500/50 glitch-effect"
+                    : "border-cyan-800/50"
+                    }`}>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-slate-100">
                         <Sparkles className="w-5 h-5 text-yellow-400" />
@@ -228,11 +269,24 @@ export default function Home() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className={`bg-slate-950/50 rounded-lg p-6 border ${
-                        response.finalResult.includes("Glitches") || response.finalResult.includes("Glitched")
-                          ? "border-red-900/30"
-                          : "border-cyan-900/30"
-                      }`}>
+                      {/* Timeline Component */}
+                      {response.finalResult.includes("Timeline") && (
+                        <div className="mb-6">
+                          <Timeline
+                            milestones={[
+                              { id: "1", year: 2024, status: "completed", type: "education" },
+                              { id: "2", year: 2025, status: "active", type: "career" },
+                              { id: "3", year: 2026, status: "pending", type: "growth" },
+                              { id: "4", year: 2027, status: "critical", type: "decision" },
+                            ]}
+                          />
+                        </div>
+                      )}
+
+                      <div className={`bg-slate-950/50 rounded-lg p-6 border ${response.finalResult.includes("Critical") || response.finalResult.includes("Glitches") || response.finalResult.includes("Glitched")
+                        ? "border-red-900/30"
+                        : "border-cyan-900/30"
+                        }`}>
                         <p className="text-slate-200 whitespace-pre-wrap font-mono text-sm leading-relaxed">
                           {response.finalResult}
                         </p>
