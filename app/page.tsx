@@ -6,7 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+<<<<<<< Updated upstream
 import { Loader2, Sparkles, Brain, GitFork } from "lucide-react";
+=======
+import { Loader2, Sparkles, Brain, Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
+>>>>>>> Stashed changes
 import { motion, AnimatePresence } from "framer-motion";
 import { Timeline } from "@/components/Timeline";
 
@@ -14,6 +18,18 @@ interface Message {
   role: string;
   content: string;
   name: string | null;
+}
+
+interface CareerRealityData {
+  reality_name: string;
+  sdg_alignment: string[];
+  timeline_phases: Array<{
+    phase: string;
+    action: string;
+    duration: string;
+  }>;
+  glitches: string[];
+  status: "Stable" | "Critical";
 }
 
 interface AgentResponse {
@@ -28,12 +44,14 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<AgentResponse | null>(null);
+  const [parsedData, setParsedData] = useState<CareerRealityData | null>(null);
 
   const handleRunAgent = async () => {
     if (!prompt.trim()) return;
 
     setLoading(true);
     setResponse(null);
+    setParsedData(null);
 
     try {
       const res = await fetch("/api/agent", {
@@ -46,6 +64,16 @@ export default function Home() {
 
       const data: AgentResponse = await res.json();
       setResponse(data);
+
+      // Try to parse the JSON response
+      if (data.success && data.finalResult) {
+        try {
+          const parsed = JSON.parse(data.finalResult);
+          setParsedData(parsed);
+        } catch (e) {
+          console.error("Failed to parse JSON:", e);
+        }
+      }
     } catch (error) {
       setResponse({
         success: false,
@@ -92,7 +120,17 @@ export default function Home() {
             Powered by <span className="text-cyan-400 font-semibold">LangGraph</span> and{" "}
             <span className="text-purple-400 font-semibold">Groq Llama 3.3</span>
           </p>
+<<<<<<< Updated upstream
           <div className="flex gap-2 justify-center mt-4">
+=======
+          <div className="flex gap-2 justify-center mt-4 flex-wrap">
+            <Badge variant="outline" className="border-green-500/50 text-green-400">
+              SDG 4: Quality Education
+            </Badge>
+            <Badge variant="outline" className="border-blue-500/50 text-blue-400">
+              SDG 8: Decent Work
+            </Badge>
+>>>>>>> Stashed changes
             <Badge variant="outline" className="border-cyan-500/50 text-cyan-400">
               Next.js 16
             </Badge>
@@ -207,68 +245,105 @@ export default function Home() {
                     )}
                   </CardContent>
                 </Card>
-              ) : (
+              ) : parsedData ? (
                 <>
-                  {/* Thought Process */}
-                  <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                  {/* Structured JSON Display */}
+                  <Card className={`backdrop-blur-sm ${
+                    parsedData.status === "Critical"
+                      ? "bg-red-950/30 border-red-500/50"
+                      : "bg-gradient-to-br from-cyan-950/30 to-blue-950/30 border-cyan-800/50"
+                  }`}>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-slate-100">
-                        <Brain className="w-5 h-5 text-purple-400" />
-                        Agent Thought Process
-                      </CardTitle>
-                      <CardDescription className="text-slate-400">
-                        Step-by-step reasoning and execution
-                      </CardDescription>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2 text-slate-100">
+                          {parsedData.status === "Critical" ? (
+                            <AlertTriangle className="w-6 h-6 text-red-400" />
+                          ) : (
+                            <CheckCircle2 className="w-6 h-6 text-green-400" />
+                          )}
+                          {parsedData.reality_name}
+                        </CardTitle>
+                        <Badge variant="outline" className={
+                          parsedData.status === "Critical"
+                            ? "border-red-500/50 text-red-400"
+                            : "border-green-500/50 text-green-400"
+                        }>
+                          {parsedData.status}
+                        </Badge>
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        {parsedData.sdg_alignment.map((sdg, idx) => (
+                          <Badge key={idx} variant="outline" className={
+                            sdg.includes("4")
+                              ? "border-green-500/50 text-green-400"
+                              : "border-blue-500/50 text-blue-400"
+                          }>
+                            {sdg}
+                          </Badge>
+                        ))}
+                      </div>
                     </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-[300px] w-full rounded-lg border border-slate-800 bg-slate-950/50 p-4">
-                        <div className="space-y-4">
-                          {response.messageHistory.map((msg, idx) => (
-                            <motion.div
-                              key={idx}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: idx * 0.1 }}
-                            >
-                              <div className="flex items-start gap-3">
-                                <Badge
-                                  variant="outline"
-                                  className={
-                                    msg.role === "human"
-                                      ? "border-cyan-500/50 text-cyan-400"
-                                      : "border-purple-500/50 text-purple-400"
-                                  }
-                                >
-                                  {msg.name || msg.role}
-                                </Badge>
+                    <CardContent className="space-y-6">
+                      {/* Timeline Phases */}
+                      <div>
+                        <h3 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+                          📍 Timeline Milestones
+                        </h3>
+                        <div className="space-y-3">
+                          {parsedData.timeline_phases.map((phase, idx) => (
+                            <div key={idx} className="bg-slate-950/50 rounded-lg p-4 border border-slate-800">
+                              <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                  <p className="text-slate-300 text-sm whitespace-pre-wrap font-mono leading-relaxed">
-                                    {msg.content}
-                                  </p>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Badge variant="outline" className="border-purple-500/50 text-purple-400">
+                                      Phase {idx + 1}: {phase.phase}
+                                    </Badge>
+                                    <span className="text-slate-500 text-sm">{phase.duration}</span>
+                                  </div>
+                                  <p className="text-slate-300 font-mono text-sm">{phase.action}</p>
                                 </div>
                               </div>
-                              {idx < response.messageHistory.length - 1 && (
-                                <Separator className="my-4 bg-slate-800" />
-                              )}
-                            </motion.div>
+                            </div>
                           ))}
                         </div>
-                      </ScrollArea>
+                      </div>
+
+                      {/* Glitches */}
+                      {parsedData.glitches && parsedData.glitches.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-400 mb-4 flex items-center gap-2">
+                            ⚠️ Reality Glitches (Collision Check)
+                          </h3>
+                          <div className="space-y-2">
+                            {parsedData.glitches.map((glitch, idx) => (
+                              <div key={idx} className="bg-red-950/20 rounded-lg p-3 border border-red-900/30">
+                                <p className="text-red-300 font-mono text-sm flex items-center gap-2">
+                                  <AlertTriangle className="w-4 h-4" />
+                                  {glitch}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 
+<<<<<<< Updated upstream
                   {/* Final Result */}
                   <Card className={`bg-gradient-to-br from-cyan-950/30 to-blue-950/30 backdrop-blur-sm ${response.finalResult.includes("Critical") || response.finalResult.includes("Glitches") || response.finalResult.includes("Glitched")
                     ? "border-red-500/50 glitch-effect"
                     : "border-cyan-800/50"
                     }`}>
+=======
+                  {/* Raw JSON View (for debugging) */}
+                  <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+>>>>>>> Stashed changes
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-slate-100">
-                        <Sparkles className="w-5 h-5 text-yellow-400" />
-                        Career Reality Simulation
-                      </CardTitle>
+                      <CardTitle className="text-slate-100 text-sm">Raw JSON Output</CardTitle>
                     </CardHeader>
                     <CardContent>
+<<<<<<< Updated upstream
                       {/* Timeline Component */}
                       {response.finalResult.includes("Timeline") && (
                         <div className="mb-6">
@@ -291,9 +366,29 @@ export default function Home() {
                           {response.finalResult}
                         </p>
                       </div>
+=======
+                      <pre className="bg-slate-950/50 rounded-lg p-4 border border-slate-800 overflow-x-auto">
+                        <code className="text-slate-300 font-mono text-xs">
+                          {JSON.stringify(parsedData, null, 2)}
+                        </code>
+                      </pre>
+>>>>>>> Stashed changes
                     </CardContent>
                   </Card>
                 </>
+              ) : (
+                <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-slate-100">Response</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="bg-slate-950/50 rounded-lg p-4 border border-slate-800 overflow-x-auto">
+                      <code className="text-slate-300 font-mono text-sm whitespace-pre-wrap">
+                        {response.finalResult}
+                      </code>
+                    </pre>
+                  </CardContent>
+                </Card>
               )}
             </motion.div>
           )}
